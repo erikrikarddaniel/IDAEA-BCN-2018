@@ -1,0 +1,9 @@
+sessionname IDAEA-BCN-2018
+setenv ROOT $PWD
+# __INSERTPOINT__ This line allows a script to insert new configuration lines here.
+chdir $ROOT/qiime2
+screen -t qiime2
+chdir $ROOT
+screen -t rstudio
+screen -t man
+screen -t root
