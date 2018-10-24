@@ -5,6 +5,8 @@ chdir $ROOT/qiime2
 screen -t qiime2
 chdir $ROOT/metawrap
 screen -t metawrap
+chdir $ROOT/analyses
+screen -t analyses
 chdir $ROOT
 screen -t rstudio
 screen -t man
