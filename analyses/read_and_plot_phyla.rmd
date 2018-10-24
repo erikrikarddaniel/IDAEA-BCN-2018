@@ -1,0 +1,56 @@
+---
+title: "Atacama soils: demo analyses"
+author: "daniel.lundin@lnu.se"
+date: "`r format(Sys.time(), '%Y-%m-%d')`"
+output:
+  pdf_document:
+    fig_caption: yes
+    fig_height: 9
+    fig_width: 8
+    number_sections: yes
+    toc: yes
+  html_document:
+    toc: yes
+---
+
+```{r setup, echo=F, cache = FALSE}
+knitr::opts_chunk$set(echo=F, fig.path='figures/', cache = TRUE)
+ggplot2::theme_set(ggplot2::theme_bw())
+```
+
+```{r libraries, message=F, cache = FALSE}
+suppressPackageStartupMessages(library(readr))
+suppressPackageStartupMessages(library(dplyr))
+suppressPackageStartupMessages(library(tidyr))
+suppressPackageStartupMessages(library(ggplot2))
+suppressPackageStartupMessages(library(kfigr))
+suppressPackageStartupMessages(library(knitr))
+```
+
+```{r constants}
+```
+
+```{r read-data}
+counts <- read_tsv('atacama-soils.asvtable.tsv', col_types = cols(.default = col_integer(), seqid = col_character())) %>%
+  gather(sample, count, 2:ncol(.)) %>%
+  filter(count > 0) %>%
+  group_by(sample) %>% mutate(relab = count/sum(count)) %>% ungroup()
+samples <- read_tsv(
+  'atacama-soils.samples.header.tsv',
+  col_types = cols(
+    .default = col_double(),
+    SampleID = col_character(), BarcodeSequence = col_character(), LinkerPrimerSequence = col_character(),
+    Elevation = col_integer(), ExtractGroupNo = col_character(), TransectName = col_character(),
+    SiteName = col_character(), Depth = col_integer(), TOC = col_integer(), Vegetation = col_character(),
+    Description = col_character()
+  )
+) %>%
+  rename(sample = SampleID)
+taxonomy <- read_tsv(
+  'atacama-soils.taxonomy.tsv',
+  col_types = cols(.default = col_character(), Confidence = col_double())
+) %>%
+  mutate(thier = gsub('D_[0-9]+__', '', Taxon)) %>% select(-Taxon) %>%
+  separate(thier, c('domain', 'phylum', 'class', 'order', 'family', 'genus', 'species'), sep = ';', fill = 'right') %>%
+  rename(seqid = `Feature ID`)
+```
