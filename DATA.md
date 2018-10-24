@@ -12,8 +12,11 @@ The files can be found as symlinks in the `analyses` directory of the repository
 ```
 atacama-soils.asvtable.tsv  
 atacama-soils.taxonomy.tsv
-atacama-soils.samples.tsv
+atacama-soils.samples.headers.tsv
 ```
+
+If you want to practice how to read BIOM data, there's an alternative to the
+`atacama-soils.asvtable.tsv`: `atacama-soils.biom`.
 
 ## QIIME2 practical
 
