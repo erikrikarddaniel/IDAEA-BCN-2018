@@ -11,6 +11,8 @@ https://docs.qiime2.org/2018.8/tutorials/atacama-soils/
 
 and then continue here, to do the taxonomy assignment:
 
+https://docs.qiime2.org/2018.8/tutorials/moving-pictures/
 
+(Scroll down to "Taxonomic analysis".)
 
 ## MetaWRAP practical
