@@ -188,15 +188,35 @@ nmds <- counts %>% select(seqid, sample, cpm) %>%
   metaMDS(k = 3, trymax = 100)
 ```
 
-```{r nmds-plot, warning = FALSE, fig.height = 6}
-nmds$points %>% broom::tidy() %>% rename(sample = .rownames) %>%
-  inner_join(samples, by = 'sample') %>%
-  ggplot(aes(x = MDS1, y = MDS2, shape = TransectName, colour = AverageSoilRelativeHumidity)) +
-  geom_point() +
-  geom_text(aes(label = SiteName), nudge_y = 0.1, colour = 'black', size = 2) +
-  scale_colour_viridis_c() +
-  theme(
-    legend.position = 'bottom'
+```{r plotnmds-func}
+plotnmds <- function(colourvar) {
+  wrapr::let(
+    c(c = colourvar),
+    {
+      nmds$points %>% broom::tidy() %>% rename(sample = .rownames) %>%
+        inner_join(samples, by = 'sample') %>%
+        ggplot(aes(x = MDS1, y = MDS2, shape = TransectName, colour = c)) +
+        geom_point() +
+        geom_text(aes(label = SiteName), nudge_y = 0.1, colour = 'black', size = 2) +
+        scale_colour_viridis_c() +
+        theme(
+          legend.position = 'bottom'
+        )
+    }
   )
+}
 ```
+
+```{r nmds-humidity-plot, warning = FALSE, fig.height = 6, fig.cap = 'NMDS coloured by relative humidity.'}
+plotnmds('AverageSoilRelativeHumidity')
+```
+
+```{r nmds-ph-plot, warning = FALSE, fig.height = 6, fig.cap = 'NMDS coloured by pH.'}
+plotnmds('pH')
+```
+```{r nmds-temperature-plot, warning = FALSE, fig.height = 6, fig.cap = 'NMDS coloured by temperature.'}
+plotnmds('AverageSoilTemperature')
+```
+
+
 
