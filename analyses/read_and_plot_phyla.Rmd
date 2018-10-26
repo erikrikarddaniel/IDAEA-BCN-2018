@@ -32,6 +32,7 @@ suppressPackageStartupMessages(library(ggplot2))
 suppressPackageStartupMessages(library(kfigr))
 suppressPackageStartupMessages(library(knitr))
 suppressPackageStartupMessages(library(edgeR))
+suppressPackageStartupMessages(library(vegan))
 ```
 
 ## Constants
@@ -154,4 +155,20 @@ counts %>% inner_join(samples, by = 'sample') %>%
   theme(
     axis.text.x = element_text(angle = 60, hjust = 1)
   )
+```
+
+# Diversity indices
+
+## Alpha diversity
+
+```{r alpha-diversity}
+counts %>% select(seqid, sample, cpm) %>%
+  spread(seqid, cpm, fill = 0) %>%
+  data.frame() %>% tibble::column_to_rownames('sample') %>%
+  diversity() %>% data.frame(shannon = .) %>% tibble::rownames_to_column('sample') %>%
+  inner_join(samples, by = 'sample') %>%
+  ggplot(aes(x = TransectName, y = shannon, colour = AverageSoilRelativeHumidity)) +
+  geom_boxplot() + geom_jitter() +
+  scale_colour_viridis_c() +
+  facet_wrap(~Depth, ncol = 1)
 ```
