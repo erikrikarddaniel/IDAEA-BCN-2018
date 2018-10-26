@@ -39,6 +39,9 @@ suppressPackageStartupMessages(library(vegan))
 
 ```{r constants}
 MIN_LIB_SIZE = 2000
+
+LOW_ELEVATION = 1500
+MID_ELEVATION = 3000
 ```
 
 # Read data files
@@ -161,7 +164,7 @@ counts %>% inner_join(samples, by = 'sample') %>%
 
 ## Alpha diversity
 
-```{r alpha-diversity}
+```{r alpha-diversity, fig.width = 8, fig.height = 8}
 counts %>% select(seqid, sample, cpm) %>%
   spread(seqid, cpm, fill = 0) %>%
   data.frame() %>% tibble::column_to_rownames('sample') %>%
@@ -170,5 +173,8 @@ counts %>% select(seqid, sample, cpm) %>%
   ggplot(aes(x = TransectName, y = shannon, colour = AverageSoilRelativeHumidity)) +
   geom_boxplot() + geom_jitter() +
   scale_colour_viridis_c() +
-  facet_wrap(~Depth, ncol = 1)
+  facet_wrap(~Depth, ncol = 1) +
+  theme(
+    legend.position = 'bottom'
+  )
 ```
