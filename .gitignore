@@ -5,3 +5,6 @@
 *.fastq*
 *.gz
 *.qz[av]
+*.html
+*.pdf
+*_cache

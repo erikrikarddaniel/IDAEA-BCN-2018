@@ -3,13 +3,13 @@ title: "Atacama soils: demo analyses"
 author: "daniel.lundin@lnu.se"
 date: "`r format(Sys.time(), '%Y-%m-%d')`"
 output:
+  html_document:
+    toc: yes
   pdf_document:
     fig_caption: yes
     fig_height: 9
     fig_width: 8
     number_sections: yes
-    toc: yes
-  html_document:
     toc: yes
 ---
 
@@ -45,7 +45,8 @@ samples <- read_tsv(
     Description = col_character()
   )
 ) %>%
-  rename(sample = SampleID)
+  rename(sample = SampleID) %>%
+  group_by(SiteName, Depth) %>% mutate(repl = rank(sample)) %>% ungroup()
 taxonomy <- read_tsv(
   'atacama-soils.taxonomy.tsv',
   col_types = cols(.default = col_character(), Confidence = col_double())
@@ -54,3 +55,33 @@ taxonomy <- read_tsv(
   separate(thier, c('domain', 'phylum', 'class', 'order', 'family', 'genus', 'species'), sep = ';', fill = 'right') %>%
   rename(seqid = `Feature ID`)
 ```
+
+```{r top10phyla}
+top10phyla <- counts %>% inner_join(taxonomy, by = 'seqid') %>%
+  group_by(phylum, sample) %>%
+  summarise(relab = sum(relab)) %>%
+  summarise(mean_relab = mean(relab)) %>%
+  ungroup() %>%
+  top_n(10, mean_relab)
+```
+
+# Phylum bar plot
+
+```{r phylum-bars, fig.height = 8}
+counts %>% inner_join(samples, by = 'sample') %>%
+  inner_join(taxonomy, by = 'seqid') %>%
+  left_join(top10phyla %>% transmute(phylum, topphylum = phylum), by = 'phylum') %>%
+  replace_na(list('phylum' = 'Other phyla')) %>%
+  group_by(SiteName, Depth, topphylum, repl) %>% 
+  summarise(relab = sum(relab)) %>% 
+  summarise(relab = mean(relab)) %>% 
+  ungroup() %>%
+  ggplot(aes(x = SiteName, y = relab, fill = topphylum)) +
+  geom_col() +
+  scale_fill_brewer(palette = 'Paired') +
+  facet_wrap(~Depth, ncol = 1) +
+  theme(
+    axis.text.x = element_text(angle = 60, hjust = 1)
+  )
+```
+
