@@ -178,3 +178,25 @@ counts %>% select(seqid, sample, cpm) %>%
     legend.position = 'bottom'
   )
 ```
+
+## Beta diversity
+
+```{r nmds, include = FALSE}
+nmds <- counts %>% select(seqid, sample, cpm) %>%
+  spread(seqid, cpm, fill = 0) %>%
+  data.frame() %>% tibble::column_to_rownames('sample') %>%
+  metaMDS(k = 3, trymax = 100)
+```
+
+```{r nmds-plot, warning = FALSE, fig.height = 6}
+nmds$points %>% broom::tidy() %>% rename(sample = .rownames) %>%
+  inner_join(samples, by = 'sample') %>%
+  ggplot(aes(x = MDS1, y = MDS2, shape = TransectName, colour = AverageSoilRelativeHumidity)) +
+  geom_point() +
+  geom_label(aes(label = SiteName), nudge_y = 0.1, colour = 'black') +
+  scale_colour_viridis_c() +
+  theme(
+    legend.position = 'bottom'
+  )
+```
+
