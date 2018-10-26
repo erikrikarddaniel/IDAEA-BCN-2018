@@ -2,7 +2,7 @@
 
 Data for the workshop at IDAEA in Barcelona November 2011.
 
-## Data for IDAEA practicals
+## Data for practicals
 
 ### Main practical: R/Tidyverse
 
