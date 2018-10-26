@@ -31,6 +31,7 @@ suppressPackageStartupMessages(library(tidyr))
 suppressPackageStartupMessages(library(ggplot2))
 suppressPackageStartupMessages(library(kfigr))
 suppressPackageStartupMessages(library(knitr))
+suppressPackageStartupMessages(library(edgeR))
 ```
 
 ## Constants
@@ -103,7 +104,7 @@ top10phyla <- counts %>% inner_join(taxonomy, by = 'seqid') %>%
 counts %>% inner_join(samples, by = 'sample') %>%
   inner_join(taxonomy, by = 'seqid') %>%
   left_join(top10phyla %>% transmute(phylum, topphylum = phylum), by = 'phylum') %>%
-  replace_na(list('phylum' = 'Other phyla')) %>%
+  replace_na(list('topphylum' = 'Other phyla')) %>%
   group_by(SiteName, Depth, topphylum, repl) %>% 
   summarise(relab = sum(relab)) %>% 
   summarise(relab = mean(relab)) %>% 
@@ -112,6 +113,44 @@ counts %>% inner_join(samples, by = 'sample') %>%
   geom_col() +
   scale_fill_brewer(palette = 'Paired') +
   facet_wrap(~Depth, ncol = 1) +
+  theme(
+    axis.text.x = element_text(angle = 60, hjust = 1)
+  )
+```
+
+# Calculating normalised data
+
+```{r edger-normalise}
+edger <- counts %>% select(-relab) %>%
+  spread(sample, count, fill = 0) %>%
+  data.frame() %>%
+  tibble::column_to_rownames('seqid') %>%
+  DGEList() %>%
+  calcNormFactors(method = 'TMM')
+
+# Add normalised cpms to counts table
+counts <- counts %>%
+  left_join(
+    edger %>% cpm() %>% 
+      data.frame() %>% tibble::rownames_to_column('seqid') %>%
+      gather(sample, cpm, 2:ncol(.)) %>% filter(cpm > 0),
+    by = c('seqid', 'sample')
+  )
+```
+
+## Barplot of normalised data
+
+```{r phylum-bars-normalised, fig.height = 8, fig.width=8}
+counts %>% inner_join(samples, by = 'sample') %>%
+  inner_join(taxonomy, by = 'seqid') %>%
+  left_join(top10phyla %>% transmute(phylum, topphylum = phylum), by = 'phylum') %>%
+  replace_na(list('topphylum' = 'Other phyla')) %>%
+  group_by(sample, topphylum, repl) %>% 
+  summarise(cpm = sum(cpm)) %>% 
+  ungroup() %>%
+  ggplot(aes(x = sample, y = cpm, fill = topphylum)) +
+  geom_col(position = 'fill') +
+  scale_fill_brewer(palette = 'Paired') +
   theme(
     axis.text.x = element_text(angle = 60, hjust = 1)
   )
