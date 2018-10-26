@@ -74,7 +74,13 @@ taxonomy <- read_tsv(
   rename(seqid = `Feature ID`)
 ```
 
-# Sequencing depth
+## Sample summary
+
+```{r sample-summary}
+samples %>% select(4, 10:14, 18, 22) %>% summary()
+```
+
+## Sequencing depth
 
 ```{r seqdepth, fig.height = 7}
 counts %>% group_by(sample) %>% summarise(count = sum(count)) %>% ungroup() %>%
