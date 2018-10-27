@@ -242,6 +242,10 @@ s <- samples %>% filter(sample %in% rownames(c)) %>%
 adonis(c ~ AverageSoilRelativeHumidity * pH * TransectName, data = s)
 ```
 
+## Correlations in the sample data?
+
+(See also blog post: https://datascienceplus.com/visualizations-for-correlation-matrices-in-r/)
+
 ```{r ph-to-humidity, fig.height = 3, warning = FALSE}
 samples %>% 
   ggplot(aes(x = AverageSoilRelativeHumidity, y = pH)) +
