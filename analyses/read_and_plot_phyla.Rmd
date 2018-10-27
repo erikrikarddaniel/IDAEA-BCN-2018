@@ -242,4 +242,11 @@ s <- samples %>% filter(sample %in% rownames(c)) %>%
 adonis(c ~ AverageSoilRelativeHumidity * pH * TransectName, data = s)
 ```
 
+```{r ph-to-humidity, fig.height = 3, warning = FALSE}
+samples %>% 
+  ggplot(aes(x = AverageSoilRelativeHumidity, y = pH)) +
+  geom_point() +
+  geom_smooth(method = 'lm', formula = y ~ x) +
+  facet_wrap(~TransectName)
+```
 
