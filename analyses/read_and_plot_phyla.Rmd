@@ -224,5 +224,22 @@ plotnmds('pH')
 plotnmds('AverageSoilTemperature')
 ```
 
+## PERMANOVA
+
+```{r permanova}
+c <- counts %>% select(sample, seqid, cpm) %>% spread(seqid, cpm, fill = 0) %>%
+  data.frame() %>% tibble::column_to_rownames('sample')
+s <- samples %>% filter(sample %in% rownames(c)) %>%
+  mutate(
+    AverageSoilTemperature = ifelse(
+      is.na(AverageSoilTemperature), mean(AverageSoilTemperature, na.rm = TRUE), AverageSoilTemperature
+    ),
+    AverageSoilRelativeHumidity = ifelse(
+      is.na(AverageSoilRelativeHumidity), mean(AverageSoilRelativeHumidity, na.rm = TRUE), AverageSoilRelativeHumidity
+    )
+  ) %>%
+  data.frame() %>% tibble::column_to_rownames('sample')
+adonis(c ~ AverageSoilRelativeHumidity * pH * TransectName, data = s)
+```
 
 
