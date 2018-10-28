@@ -171,11 +171,12 @@ counts %>% inner_join(samples, by = 'sample') %>%
 ## Alpha diversity
 
 ```{r alpha-diversity, fig.width = 8, fig.height = 8}
-counts %>% select(seqid, sample, cpm) %>%
+shannon <- counts %>% select(seqid, sample, cpm) %>%
   spread(seqid, cpm, fill = 0) %>%
   data.frame() %>% tibble::column_to_rownames('sample') %>%
-  diversity() %>% data.frame(shannon = .) %>% tibble::rownames_to_column('sample') %>%
-  inner_join(samples, by = 'sample') %>%
+  diversity() %>% data.frame(shannon = .) %>% tibble::rownames_to_column('sample')
+shannon %>%
+  inner_join(samples, by = 'sample')
   ggplot(aes(x = TransectName, y = shannon, colour = AverageSoilRelativeHumidity)) +
   geom_boxplot() + geom_jitter() +
   scale_colour_viridis_c() +
@@ -248,9 +249,14 @@ adonis(c ~ AverageSoilRelativeHumidity * pH * TransectName, data = s)
 
 ```{r ph-to-humidity, fig.height = 3, warning = FALSE}
 samples %>% 
-  ggplot(aes(x = AverageSoilRelativeHumidity, y = pH)) +
+  inner_join(shannon, by = 'sample') %>%
+  ggplot(aes(x = AverageSoilRelativeHumidity, y = pH, colour = shannon)) +
   geom_point() +
+  scale_colour_viridis_c() +
   geom_smooth(method = 'lm', formula = y ~ x) +
-  facet_wrap(~TransectName)
+  facet_wrap(~TransectName, ncol = 1) +
+  theme(
+    legend.position = 'bottom'
+  )
 ```
 
