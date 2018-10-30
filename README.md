@@ -2,9 +2,7 @@
 
 Data for the workshop at IDAEA in Barcelona November 2011.
 
-## Data for practicals
-
-### Main practical: R/Tidyverse
+## Data for practicals -- R/Tidyverse
 
 The R metapackage Tidyverse is a collection of packages for "tidy" data science.
 
@@ -21,18 +19,3 @@ atacama-soils.samples.headers.tsv
 
 If you want to practice how to read BIOM data, there's an alternative to the
 `atacama-soils.asvtable.tsv`: `atacama-soils.biom`.
-
-### QIIME2 practical
-
-If you want to try out QIIME2 using DADA2 and the sklearn algorithm for
-taxonomy assignment, start here:
-
-https://docs.qiime2.org/2018.8/tutorials/atacama-soils/
-
-and then continue here, to do the taxonomy assignment:
-
-https://docs.qiime2.org/2018.8/tutorials/moving-pictures/
-
-(Scroll down to "Taxonomic analysis".)
-
-### MetaWRAP practical
