@@ -1,6 +1,6 @@
 # IDAEA-BCN-2018
 
-Data for the workshop at IDAEA in Barcelona November 2011.
+Data, and some presentation material, for the workshop at IDAEA in Barcelona November 2011.
 
 ## Data for practicals -- R/Tidyverse
 
