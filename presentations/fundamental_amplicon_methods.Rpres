@@ -1,0 +1,46 @@
+Fundamental amplicon methods
+========================================================
+author: Daniel Lundin
+date: 29 October 2018
+autosize: true
+
+Sequencing errors 
+========================================================
+How many correct sequences do we get?
+
+OTU clustering
+========================================================
+
+![UPARSE](uparseotu_algo.jpg)
+
+[From the USEARCH documentation: https://drive5.com](https://drive5.com)
+
+Correcting sequencing errors: Why?
+========================================================
+![DADA2](dada2_accuracy.jpg)
+
+[From the DADA2 website: https://benjjneb.github.io/dada2/index.html](https://benjjneb.github.io/dada2/index.html)
+
+Correcting sequencing errors: How?
+========================================================
+
+Correcting sequencing errors: Consistent
+========================================================
+
+No need to recluster!
+
+Correcting sequencing errors: A comparison
+========================================================
+
+![Nearing 2018](nearing_2018.png)
+
+Nearing *et al.* 2018
+
+Assigning taxonomy 1: Alignment
+========================================================
+
+Assigning taxonomy 2: kmer-based methods
+========================================================
+
+Assigning taxonomy 3: Phylogenetic placement 
+========================================================
