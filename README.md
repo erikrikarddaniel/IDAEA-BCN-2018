@@ -19,3 +19,7 @@ atacama-soils.samples.headers.tsv
 
 If you want to practice how to read BIOM data, there's an alternative to the
 `atacama-soils.asvtable.tsv`: `atacama-soils.biom`.
+
+## Presentations
+
+There are `.Rpres` files in the `presentations` directory which can be viewed in RStudio.
