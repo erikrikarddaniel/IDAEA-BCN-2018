@@ -5,3 +5,4 @@
 *.fastq*
 *.gz
 *.qz[av]
+biomakefiles
