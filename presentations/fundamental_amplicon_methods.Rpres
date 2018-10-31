@@ -42,13 +42,20 @@ Assigning taxonomy 1: Alignment
 Assigning taxonomy 2: kmer-based methods
 ========================================================
 
-Assigning taxonomy 3: Phylogenetic placement 
+Assigning taxonomy 3a: Phylogenetic placement 
 ========================================================
 
 Unifrac distances/PCA based on three different trees:
 
-![phyloplacement](denovo_tree_artifacts.png)
+![phyloplacement](sepp.denovo_tree_artifacts.svg.png)
 
 Fragment insertion avoids artificially long outgroup branches that would lead to exaggerated separation in beta diversity.
 
 https://github.com/biocore/q2-fragment-insertion
+
+Assigning taxonomy 3b: Phylogenetic placement 
+========================================================
+
+Fragment insertion enables meta-analyses across different variable 16S regions and fragment length.
+
+![metaanalysis](sepp.metaanalysis.png)
