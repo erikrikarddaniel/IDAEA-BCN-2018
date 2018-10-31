@@ -44,3 +44,11 @@ Assigning taxonomy 2: kmer-based methods
 
 Assigning taxonomy 3: Phylogenetic placement 
 ========================================================
+
+Unifrac distances/PCA based on three different trees:
+
+![phyloplacement](denovo_tree_artifacts.png)
+
+Fragment insertion avoids artificially long outgroup branches that would lead to exaggerated separation in beta diversity.
+
+https://github.com/biocore/q2-fragment-insertion
