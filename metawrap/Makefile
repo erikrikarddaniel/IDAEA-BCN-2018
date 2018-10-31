@@ -1,3 +1,9 @@
+include ../biomakefiles/lib/make/makefile.metawrap
+
+MW_RAW_READS_DIR = rawseqs
+MW_THREADS = -t 2
+MW_MEMORY = -m 48
+
 URL = ftp.sra.ebi.ac.uk/vol1/fastq/ERR011
 
 download:

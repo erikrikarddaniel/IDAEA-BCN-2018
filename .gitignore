@@ -5,6 +5,7 @@
 *.fastq*
 *.gz
 *.qz[av]
+biomakefiles
 *.html
 *.pdf
 *_cache

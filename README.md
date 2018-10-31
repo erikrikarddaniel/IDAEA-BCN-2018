@@ -23,3 +23,9 @@ If you want to practice how to read BIOM data, there's an alternative to the
 ## Presentations
 
 There are `.Rpres` files in the `presentations` directory which can be viewed in RStudio.
+
+## Papers
+
+We have created a Zotero group with some important papers:
+
+https://www.zotero.org/groups/2248637/201811_idaeaicm_microbial_ecology_ws/items
