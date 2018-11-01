@@ -1,0 +1,18 @@
+Organizing your work
+========================================================
+author: Daniel Lundin
+date: IDAEA, Barcelona, 5 November 2018
+autosize: true
+
+3 change states
+========================================================
+
+1. *Never changing*: e.g. sequence fastq files
+2. *Seldom changing once created
+3. *Often changing*
+
+Separate annotation and analysis
+========================================================
+
+Directory structure
+========================================================
