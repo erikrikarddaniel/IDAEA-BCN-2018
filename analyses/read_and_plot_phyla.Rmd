@@ -128,42 +128,37 @@ counts %>% inner_join(samples, by = 'sample') %>%
   )
 ```
 
-# Calculating normalised data
+## Rarefying
 
-```{r edger-normalise}
-edger <- counts %>% select(-relab) %>%
-  spread(sample, count, fill = 0) %>%
-  data.frame() %>%
-  tibble::column_to_rownames('seqid') %>%
-  DGEList() %>%
-  calcNormFactors(method = 'TMM')
+Rarefying has long been used to make e.g. alpha- and beta-diversity
+measurements more comparable or more trustworthy respectively. The 
+practice has lately been called into question (McMurdie & Holmes 2015),
+primarily for its use in identification of differentially abundant
+populations. There are better methods for that, e.g. EdgeR and DESeq.
+For alpha diversity measurements like Shannon and beta diversity
+measurements like Unifrac and Bray-Curtis, I believe the method is safe
+to use.
 
-# Add normalised cpms to counts table
+Simply put, rarefying is subsampling all libraries to the size of the 
+smallest. This can be performed with the `rrarefy` function in 
+`vegan`.
+
+```{r rarefy}
+min_lib_size <- counts %>%
+  group_by(sample) %>% summarise(count = sum(count)) %>%
+  summarise(mincount = min(count)) %>% ungroup() %>%
+  pull(mincount)
+r <- counts %>%
+  select(seqid, sample, count) %>%
+  spread(seqid, count, fill = 0) %>%
+  data.frame() %>% tibble::column_to_rownames('sample') %>%
+  rrarefy(min_lib_size) %>%
+  data.frame() %>% tibble::rownames_to_column('sample') %>%
+  gather(seqid, rcount, 2:ncol(.)) %>%
+  filter(rcount > 0)
 counts <- counts %>%
-  left_join(
-    edger %>% cpm() %>% 
-      data.frame() %>% tibble::rownames_to_column('seqid') %>%
-      gather(sample, cpm, 2:ncol(.)) %>% filter(cpm > 0),
-    by = c('seqid', 'sample')
-  )
-```
-
-## Barplot of normalised data
-
-```{r phylum-bars-normalised, fig.height = 8, fig.width=8}
-counts %>% inner_join(samples, by = 'sample') %>%
-  inner_join(taxonomy, by = 'seqid') %>%
-  left_join(top10phyla %>% transmute(phylum, topphylum = phylum), by = 'phylum') %>%
-  replace_na(list('topphylum' = 'Other phyla')) %>%
-  group_by(sample, topphylum, repl) %>% 
-  summarise(cpm = sum(cpm)) %>% 
-  ungroup() %>%
-  ggplot(aes(x = sample, y = cpm, fill = topphylum)) +
-  geom_col(position = 'fill') +
-  scale_fill_brewer(palette = 'Paired') +
-  theme(
-    axis.text.x = element_text(angle = 60, hjust = 1)
-  )
+  left_join(r, by = c('sample', 'seqid')) %>%
+  replace_na(list('rcount' = 0))
 ```
 
 # Diversity indices
@@ -171,8 +166,8 @@ counts %>% inner_join(samples, by = 'sample') %>%
 ## Alpha diversity
 
 ```{r alpha-diversity, fig.width = 8, fig.height = 8}
-shannon <- counts %>% select(seqid, sample, cpm) %>%
-  spread(seqid, cpm, fill = 0) %>%
+shannon <- counts %>% select(seqid, sample, rcount) %>%
+  spread(seqid, rcount, fill = 0) %>%
   data.frame() %>% tibble::column_to_rownames('sample') %>%
   diversity() %>% data.frame(shannon = .) %>% tibble::rownames_to_column('sample')
 shannon %>%
@@ -189,8 +184,8 @@ shannon %>%
 ## Beta diversity
 
 ```{r nmds, include = FALSE}
-nmds <- counts %>% select(seqid, sample, cpm) %>%
-  spread(seqid, cpm, fill = 0) %>%
+nmds <- counts %>% select(seqid, sample, rcount) %>%
+  spread(seqid, rcount, fill = 0) %>%
   data.frame() %>% tibble::column_to_rownames('sample') %>%
   metaMDS(k = 3, trymax = 100)
 ```
@@ -227,8 +222,24 @@ plotnmds('AverageSoilTemperature')
 
 ## PERMANOVA
 
+First add normalized counts per million by using EdgeR.
+
+```{r norm-cpms}
+edger <- counts %>% select(sample, seqid, count) %>%
+  spread(sample, count, fill = 0) %>%
+  data.frame() %>% tibble::column_to_rownames('seqid') %>%
+  DGEList() %>% calcNormFactors(method = 'TMM') %>%
+  cpm() %>%
+  data.frame() %>% tibble::rownames_to_column('seqid') %>%
+  gather(sample, cpm, 2:ncol(.)) %>% filter(cpm > 0)
+counts <- counts %>%
+  left_join(edger, by = c('sample', 'seqid')) %>%
+  replace_na(list('cpm' = 0))
+```
+
 ```{r permanova}
-c <- counts %>% select(sample, seqid, cpm) %>% spread(seqid, cpm, fill = 0) %>%
+c <- counts %>% select(sample, seqid, cpm) %>% 
+  spread(seqid, cpm, fill = 0) %>%
   data.frame() %>% tibble::column_to_rownames('sample')
 s <- samples %>% filter(sample %in% rownames(c)) %>%
   mutate(
@@ -240,7 +251,7 @@ s <- samples %>% filter(sample %in% rownames(c)) %>%
     )
   ) %>%
   data.frame() %>% tibble::column_to_rownames('sample')
-adonis(c ~ AverageSoilRelativeHumidity * pH * TransectName, data = s)
+adonis(c ~ AverageSoilRelativeHumidity * pH, data = s)
 ```
 
 ## Correlations in the sample data?
