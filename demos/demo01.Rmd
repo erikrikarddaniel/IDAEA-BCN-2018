@@ -1,0 +1,112 @@
+---
+title: "IDAE ws demo 2"
+author: "Daniel"
+date: "12/5/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(readr)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+```
+
+# Read data
+
+First, we need to read the data, in our case three tab separated tables.
+We do this using the ReadR `read_tsv` function.
+
+```{r read-data}
+counts <- read_tsv(
+  "../analyses/atacama-soils.asvtable.tsv",
+  col_types = cols(
+    .default = col_integer(),
+    seqid = col_character()
+  )
+) %>%
+  # Make the table long
+  gather(sample, count, 2:67) %>%
+  # Filter so we only have rows with count > 0
+  filter(count > 0) %>%
+  # Filter out observations from samples smaller than 2000 counts in total
+  group_by(sample) %>% filter(sum(count) >= 2000) %>% ungroup()
+
+samples <- read_tsv(
+  '../analyses/atacama-soils.samples.header.tsv',
+  col_types = cols(
+    .default = col_double(),
+    SampleID = col_character(),
+    BarcodeSequence = col_character(),
+    LinkerPrimerSequence = col_character(),
+    Elevation = col_integer(),
+    ExtractGroupNo = col_character(),
+    TransectName = col_character(),
+    SiteName = col_character(),
+    Depth = col_integer(),
+    TOC = col_integer(),
+    Vegetation = col_character(),
+    Description = col_character()
+  )
+)
+
+taxa <- read_tsv(
+  '../analyses/atacama-soils.taxonomy.tsv',
+  col_types = cols(.default = col_character())
+) %>%
+  # Get rid of the D_0__ etc at the start of each taxon level
+  mutate(Taxon = gsub('D_[0-9]__', '', Taxon)) %>%
+  # Separate the joined taxonomy into known pieces
+  separate(Taxon, sep = ';', c('domain', 'phylum', 'class', 'order', 'family', 'genus'), fill = 'right', extra = 'drop')
+```
+
+# Plot sequencing depth
+
+```{r plot-seqdepth}
+counts %>% 
+  # Calculate a summed count per sample
+  group_by(sample) %>% summarise(count = sum(count)) %>% ungroup() %>%
+  # Use ggplot to plot a point plot with samples along the x axis and
+  # count on the y.
+  ggplot(aes(x = sample, y = count)) +
+  geom_point() +
+  # Flip x and y axes
+  coord_flip()
+```
+
+# Phylum plot
+
+```{r}
+top10phyla <- counts %>%
+  inner_join(taxa, by = c('seqid' = 'Feature ID')) %>%
+  group_by(phylum, sample) %>%
+  summarise(count = sum(count)) %>%
+  summarise(meancount = mean(count)) %>%
+  ungroup() %>%
+  top_n(10, meancount)
+```
+
+```{r phylum-plot}
+# Join counts with taxonomy, note the by =
+counts %>% inner_join(taxa, by = c('seqid' = 'Feature ID')) %>%
+  select(sample, phylum, count) %>%
+  left_join(
+    top10phyla %>% transmute(phylum, topphylum = phylum), 
+    by = 'phylum'
+  ) %>%
+  replace_na(list('topphylum' = 'Other')) %>%
+  # Sum over samples and phyla
+  group_by(sample, topphylum) %>% 
+  summarise(count = sum(count)) %>% 
+  ungroup() %>%
+  # Plot as a coloured bar plot
+  ggplot(aes(x = sample, y = count, fill = topphylum)) +
+  geom_col(position = 'fill') +
+  scale_fill_brewer(palette = 'Paired') +
+  #geom_col() +
+  theme(
+    axis.text.x = element_text(angle = 60, hjust = 1)
+  )
+```
+
