@@ -11,6 +11,7 @@ library(readr)
 library(dplyr)
 library(tidyr)
 library(ggplot2)
+library(vegan)
 ```
 
 # Read data
@@ -109,4 +110,54 @@ counts %>% inner_join(taxa, by = c('seqid' = 'Feature ID')) %>%
     axis.text.x = element_text(angle = 60, hjust = 1)
   )
 ```
+
+```{r calc-relab}
+counts <- counts %>%
+  group_by(sample) %>%
+  mutate(relab = count/sum(count)) %>%
+  ungroup()
+```
+
+```{r}
+counts %>% 
+  mutate(r = rank(desc(count), ties.method = 'first')) %>%
+  ggplot(aes(x = r, y = relab, colour = sample)) +
+  geom_line(aes(group = sample), show.legend = FALSE) +
+  facet_wrap(~sample)
+```
+
+```{r}
+min_lib_size <- counts %>% group_by(sample) %>% summarise(c = sum(count)) %>%
+  summarise(cmin = min(c)) %>%
+  pull(cmin)
+
+counts <- counts %>%
+  select(seqid, sample, count) %>%
+  spread(seqid, count, fill = 0) %>%
+  data.frame() %>% tibble::column_to_rownames('sample') %>%
+  rrarefy(min_lib_size) %>%
+  data.frame() %>% tibble::rownames_to_column('sample') %>%
+  gather(seqid, rcount, 2:ncol(.)) %>%
+  filter(rcount > 0) %>%
+  right_join(counts, by = c('sample', 'seqid')) %>%
+  replace_na(list('rcount' = 0))
+```
+
+```{r}
+counts %>% select(seqid, sample, rcount) %>%
+  spread(seqid, rcount, fill = 0) %>%
+  data.frame() %>% tibble::column_to_rownames('sample') %>%
+  diversity() %>%
+  data.frame(shannon = .) %>% tibble::rownames_to_column('sample') %>%
+  inner_join(samples, by = c('sample' = 'SampleID')) %>%
+  ggplot(aes(x = TransectName, y = shannon, colour = AverageSoilRelativeHumidity)) +
+  geom_violin() +
+  geom_jitter(width = 0.1) +
+  scale_colour_viridis_c() +
+  coord_flip() +
+  theme(
+    legend.position = 'bottom'
+  )
+```
+
 
