@@ -90,6 +90,21 @@ counts %>% group_by(sample) %>% summarise(count = sum(count)) %>% ungroup() %>%
   coord_flip()
 ```
 
+## Rank abundance
+
+```{r}
+counts %>%
+  # Define a variable that ranks the samples
+  mutate(rs = rank(sample)) %>%
+  group_by(sample) %>%
+  # Define a rank of the ASVs in falling order of abundance. Add the
+  # sample rank (rs) divided by fifty to separate them on the x axis.
+  mutate(r = rank(desc(count), ties.method = 'first') + rs/50) %>%
+  ungroup() %>%
+  ggplot(aes(x = r, y = count, colour = sample)) +
+  geom_line(aes(group = sample), show.legend = FALSE)
+```
+
 ## Delete too small libraries
 
 ```{r min-lib-size}
