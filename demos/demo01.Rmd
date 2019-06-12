@@ -126,7 +126,7 @@ counts %>%
   facet_wrap(~sample)
 ```
 
-```{r}
+```{r rarefy-counts}
 min_lib_size <- counts %>% group_by(sample) %>% summarise(c = sum(count)) %>%
   summarise(cmin = min(c)) %>%
   pull(cmin)
@@ -143,7 +143,7 @@ counts <- counts %>%
   replace_na(list('rcount' = 0))
 ```
 
-```{r}
+```{r plot-shannon}
 counts %>% select(seqid, sample, rcount) %>%
   spread(seqid, rcount, fill = 0) %>%
   data.frame() %>% tibble::column_to_rownames('sample') %>%
